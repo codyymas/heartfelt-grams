@@ -9,9 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@wix/data": "^1.0.395",
+    "@wix/media": "^1.0.233",
+    "@wix/sdk": "^1.21.3",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "resend": "^6.9.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
