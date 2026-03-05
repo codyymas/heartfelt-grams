@@ -10,6 +10,10 @@ export async function POST(request: NextRequest) {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const recipientName = formData.get('recipientName') as string;
+    const memory = formData.get('memory') as string;
+    const compliment1 = formData.get('compliment1') as string;
+    const compliment2 = formData.get('compliment2') as string;
+    const compliment3 = formData.get('compliment3') as string;
     const message = formData.get('message') as string;
     const files = formData.getAll('files') as File[];
 
@@ -26,8 +30,8 @@ export async function POST(request: NextRequest) {
     );
 
     const result = await resend.emails.send({
-      from: 'Heartfelt Grams <orders@heartfeltcraftsco.com>',
-      to: process.env.RECIPIENT_EMAIL!,
+      from: 'Heartfelt Grams <onboarding@resend.dev>',
+      to: 'contact@heartfeltcraftsco.com',
       replyTo: email,
       subject: `New Order from ${name}`,
       html: `
@@ -37,6 +41,14 @@ export async function POST(request: NextRequest) {
         <p><strong>Recipient:</strong> ${recipientName}</p>
         <p><strong>Message:</strong></p>
         <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${message}</p>
+        <p><strong>Favorite Memory:</strong></p>
+        <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${memory}</p>
+        <p><strong>3 Compliments:</strong></p>
+        <ol style="padding-left:20px;">
+          <li>${compliment1}</li>
+          <li>${compliment2}</li>
+          <li>${compliment3}</li>
+        </ol>
         <p style="color:#9ca3af;font-size:12px;">${attachments.length} file(s) attached</p>
       `,
       attachments,

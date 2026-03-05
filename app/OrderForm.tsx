@@ -9,6 +9,10 @@ export default function OrderForm() {
     name: '',
     email: '',
     recipientName: '',
+    memory: '',
+    compliment1: '',
+    compliment2: '',
+    compliment3: '',
     message: '',
   });
 
@@ -21,6 +25,10 @@ export default function OrderForm() {
       data.append('name', formData.name);
       data.append('email', formData.email);
       data.append('recipientName', formData.recipientName);
+      data.append('memory', formData.memory);
+      data.append('compliment1', formData.compliment1);
+      data.append('compliment2', formData.compliment2);
+      data.append('compliment3', formData.compliment3);
       data.append('message', formData.message);
 
       if (files) {
@@ -120,14 +128,70 @@ export default function OrderForm() {
         </div>
 
         <div className="mt-4">
-          <label className="block text-xs text-gray-500 mb-1">Your Message</label>
+          <label className="block text-xs text-gray-500 mb-1">Your Message <span className="text-gray-300">(optional)</span></label>
           <textarea
             placeholder="Write something heartfelt..."
-            required
             rows={5}
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           />
+        </div>
+      </div>
+
+      {/* Section 3 — A Favorite Memory */}
+      <div>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-600 text-sm font-bold flex items-center justify-center shrink-0">
+            3
+          </div>
+          <h2 className="font-semibold text-gray-800">A Favorite Memory <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
+        </div>
+
+        <textarea
+          placeholder="Share a special moment or memory you have with this person..."
+          rows={4}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+          onChange={(e) => setFormData({ ...formData, memory: e.target.value })}
+        />
+      </div>
+
+      {/* Section 4 — 3 Compliments */}
+      <div>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-600 text-sm font-bold flex items-center justify-center shrink-0">
+            4
+          </div>
+          <h2 className="font-semibold text-gray-800">3 Compliments <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Compliment 1</label>
+            <input
+              type="text"
+              placeholder="e.g. You always know how to make me laugh"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+              onChange={(e) => setFormData({ ...formData, compliment1: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Compliment 2</label>
+            <input
+              type="text"
+              placeholder="e.g. Your kindness is truly one of a kind"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+              onChange={(e) => setFormData({ ...formData, compliment2: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Compliment 3</label>
+            <input
+              type="text"
+              placeholder="e.g. I admire how hard you work every day"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+              onChange={(e) => setFormData({ ...formData, compliment3: e.target.value })}
+            />
+          </div>
         </div>
       </div>
 
