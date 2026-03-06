@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
 
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
     const recipientName = formData.get('recipientName') as string;
     const memory = formData.get('memory') as string;
     const compliment1 = formData.get('compliment1') as string;
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
         <h2 style="color:#b91c1c;">New Order from ${name}</h2>
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+        <p><strong>Phone:</strong> ${phone}</p>
         <p><strong>Recipient:</strong> ${recipientName}</p>
         <p><strong>Message:</strong></p>
         <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${message || '(none)'}</p>

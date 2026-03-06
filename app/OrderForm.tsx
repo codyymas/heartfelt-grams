@@ -10,6 +10,7 @@ export default function OrderForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     recipientName: '',
     memory: '',
     compliment1: '',
@@ -55,6 +56,7 @@ export default function OrderForm() {
       const data = new FormData();
       data.append('name', formData.name);
       data.append('email', formData.email);
+      data.append('phone', formData.phone);
       data.append('recipientName', formData.recipientName);
       data.append('memory', formData.memory);
       data.append('compliment1', formData.compliment1);
@@ -111,6 +113,17 @@ export default function OrderForm() {
           </div>
         </div>
 
+        <div className="mb-4">
+          <label className="block text-xs text-gray-500 mb-1">Your Phone Number</label>
+          <input
+            type="tel"
+            placeholder="(123) 456-7890"
+            required
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          />
+        </div>
+
         <div>
           <label className="block text-xs text-gray-500 mb-1">Recipient&apos;s Name</label>
           <input
@@ -133,7 +146,7 @@ export default function OrderForm() {
         </div>
 
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Upload Photos &amp; Videos (Max 15, Videos up to 40MB)</label>
+          <label className="block text-xs text-gray-500 mb-1">Upload Photos (Max 15)</label>
           <label className="cursor-pointer block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:bg-rose-50 hover:border-rose-200 transition-colors">
             <div className="flex flex-col items-center gap-2">
               <svg className="w-9 h-9 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +159,7 @@ export default function OrderForm() {
               ) : (
                 <>
                   <p className="text-rose-500 text-sm font-medium">Click to upload your favorite moments</p>
-                  <p className="text-gray-400 text-xs">JPG, PNG, MP4, MOV and more · Videos up to 40MB · Hold Cmd (Mac) or Ctrl (Windows) to select multiple files</p>
+                  <p className="text-gray-400 text-xs">JPG, PNG and more · If you have a video file we will follow up · Hold Cmd (Mac) or Ctrl (Windows) to select multiple files</p>
                 </>
               )}
             </div>
