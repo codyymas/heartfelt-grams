@@ -4,7 +4,9 @@ import { useState } from 'react';
 
 export default function OrderForm() {
   const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [fileCount, setFileCount] = useState(0);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,8 +18,37 @@ export default function OrderForm() {
     message: '',
   });
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files;
+    if (!selected || selected.length === 0) return;
+    setFileCount(selected.length);
+    setUploading(true);
+    setUploadedUrls([]);
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const urls: string[] = [];
+
+    for (const file of Array.from(selected)) {
+      const data = new FormData();
+      data.append('file', file);
+      data.append('upload_preset', uploadPreset!);
+      const resourceType = /\.(mov|mp4|avi|wmv|mkv|m4v|webm)$/i.test(file.name) || file.type.startsWith('video/') ? 'video' : 'image';
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+        { method: 'POST', body: data }
+      );
+      const json = await res.json();
+      if (json.secure_url) urls.push(json.secure_url);
+    }
+
+    setUploadedUrls(urls);
+    setUploading(false);
+  };
+
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
+    if (uploading) return;
     setLoading(true);
 
     try {
@@ -30,10 +61,7 @@ export default function OrderForm() {
       data.append('compliment2', formData.compliment2);
       data.append('compliment3', formData.compliment3);
       data.append('message', formData.message);
-
-      if (files) {
-        Array.from(files).forEach((file) => data.append('files', file));
-      }
+      uploadedUrls.forEach((url) => data.append('fileUrls', url));
 
       const res = await fetch('/api/submit', { method: 'POST', body: data });
       if (!res.ok) throw new Error('Submission failed');
@@ -105,16 +133,21 @@ export default function OrderForm() {
         </div>
 
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Upload Photos &amp; Videos (Max 15)</label>
+          <label className="block text-xs text-gray-500 mb-1">Upload Photos &amp; Videos (Max 15, Videos up to 40MB)</label>
           <label className="cursor-pointer block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:bg-rose-50 hover:border-rose-200 transition-colors">
             <div className="flex flex-col items-center gap-2">
               <svg className="w-9 h-9 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              <p className="text-rose-500 text-sm font-medium">Click to upload your favorite moments</p>
-              <p className="text-gray-400 text-xs">JPG, PNG, MP4 up to 5GB</p>
-              {files && files.length > 0 && (
-                <p className="text-rose-600 text-xs font-semibold mt-1">{files.length} file(s) selected</p>
+              {uploading ? (
+                <p className="text-rose-500 text-sm font-medium">Uploading {fileCount} file(s)...</p>
+              ) : uploadedUrls.length > 0 ? (
+                <p className="text-green-600 text-sm font-semibold">{uploadedUrls.length} file(s) uploaded ✓</p>
+              ) : (
+                <>
+                  <p className="text-rose-500 text-sm font-medium">Click to upload your favorite moments</p>
+                  <p className="text-gray-400 text-xs">JPG, PNG, MP4, MOV and more · Videos up to 40MB · Hold Cmd (Mac) or Ctrl (Windows) to select multiple files</p>
+                </>
               )}
             </div>
             <input
@@ -122,7 +155,7 @@ export default function OrderForm() {
               multiple
               accept="image/*,video/*"
               className="hidden"
-              onChange={(e) => setFiles(e.target.files)}
+              onChange={handleFileChange}
             />
           </label>
         </div>
@@ -197,10 +230,10 @@ export default function OrderForm() {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || uploading}
         className="w-full bg-rose-500 text-white py-3 rounded-full font-semibold hover:bg-rose-600 disabled:opacity-50 transition-colors"
       >
-        {loading ? 'Submitting...' : 'Continue to Payment →'}
+        {loading ? 'Submitting...' : uploading ? 'Uploading files...' : 'Continue to Payment →'}
       </button>
 
     </form>

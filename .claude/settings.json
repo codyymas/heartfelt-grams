@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(brew --version)",
-      "Bash(npm install -g vercel)"
+      "Bash(npm install -g vercel)",
+      "Bash(npx vercel --prod)",
+      "Bash(npx vercel)",
+      "Bash(npx vercel whoami)",
+      "Bash(npx vercel teams ls)",
+      "Bash(git config user.email \"contact@heartfeltcraftsco.com\")",
+      "Bash(git commit --amend --reset-author --no-edit)",
+      "Bash(npm run build)",
+      "Bash(npx vercel deploy --prebuilt --prod)",
+      "Bash(npx vercel build)",
+      "Bash(npx vercel pull --yes)",
+      "Bash(npx vercel build --prod)"
     ]
   }
 }

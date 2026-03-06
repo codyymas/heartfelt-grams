@@ -15,21 +15,13 @@ export async function POST(request: NextRequest) {
     const compliment2 = formData.get('compliment2') as string;
     const compliment3 = formData.get('compliment3') as string;
     const message = formData.get('message') as string;
-    const files = formData.getAll('files') as File[];
+    const fileUrls = formData.getAll('fileUrls') as string[];
 
-    const attachments = await Promise.all(
-      files
-        .filter((f) => f.size > 0)
-        .map(async (file) => {
-          const buffer = await file.arrayBuffer();
-          return {
-            filename: file.name,
-            content: Buffer.from(buffer),
-          };
-        })
-    );
+    const fileLinksHtml = fileUrls.length > 0
+      ? fileUrls.map((url, i) => `<a href="${url}" style="display:block;color:#b91c1c;margin-bottom:6px;">📎 Download File ${i + 1}</a>`).join('')
+      : '<p style="color:#9ca3af;">No files uploaded</p>';
 
-    const result = await resend.emails.send({
+    await resend.emails.send({
       from: 'Heartfelt Grams <onboarding@resend.dev>',
       to: 'contact@heartfeltcraftsco.com',
       replyTo: email,
@@ -40,21 +32,20 @@ export async function POST(request: NextRequest) {
         <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
         <p><strong>Recipient:</strong> ${recipientName}</p>
         <p><strong>Message:</strong></p>
-        <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${message}</p>
+        <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${message || '(none)'}</p>
         <p><strong>Favorite Memory:</strong></p>
-        <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${memory}</p>
+        <p style="white-space:pre-wrap;background:#fef2f2;padding:12px;border-radius:6px;">${memory || '(none)'}</p>
         <p><strong>3 Compliments:</strong></p>
         <ol style="padding-left:20px;">
-          <li>${compliment1}</li>
-          <li>${compliment2}</li>
-          <li>${compliment3}</li>
+          <li>${compliment1 || '(none)'}</li>
+          <li>${compliment2 || '(none)'}</li>
+          <li>${compliment3 || '(none)'}</li>
         </ol>
-        <p style="color:#9ca3af;font-size:12px;">${attachments.length} file(s) attached</p>
+        <p><strong>Uploaded Files:</strong></p>
+        ${fileLinksHtml}
       `,
-      attachments,
     });
 
-    console.log('Resend result:', JSON.stringify(result));
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Email error:', error);
