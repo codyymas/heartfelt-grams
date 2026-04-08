@@ -21,6 +21,7 @@ export default function OrderForm() {
     compliment2: '',
     compliment3: '',
     message: '',
+    missingFiles: '',
   });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +98,7 @@ export default function OrderForm() {
       data.append('compliment2', formData.compliment2);
       data.append('compliment3', formData.compliment3);
   data.append('additionalNotes', formData.additionalNotes);
+      data.append('missingFiles', formData.missingFiles);
       data.append('message', formData.message);
       uploadedUrls.forEach((url) => data.append('fileUrls', url));
 
@@ -260,6 +262,16 @@ export default function OrderForm() {
               onChange={handleFileChange}
             />
           </label>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-bold text-gray-700 mb-1">Did all of your files fit in the box above? If not, we will reach out for any photos or videos that did not fit via text. <span className="font-normal text-gray-400">(optional)</span></label>
+          <textarea
+            placeholder="e.g. Yes, please reach out for more — or — No, I included all my files!"
+            rows={2}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+            onChange={(e) => setFormData({ ...formData, missingFiles: e.target.value })}
+          />
         </div>
 
         <div className="mt-4">
