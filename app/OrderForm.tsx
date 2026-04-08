@@ -7,11 +7,15 @@ export default function OrderForm() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [fileCount, setFileCount] = useState(0);
+  const [uploadError, setUploadError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     recipientName: '',
+    occasion: '',
+    theme: '',
+    additionalNotes: '',
     memory: '',
     compliment1: '',
     compliment2: '',
@@ -22,9 +26,27 @@ export default function OrderForm() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected || selected.length === 0) return;
+
+    if (selected.length > 15) {
+      alert('You can upload a maximum of 15 files.');
+      e.target.value = '';
+      return;
+    }
+
+    for (const file of Array.from(selected)) {
+      const isVideo = /\.(mov|mp4|avi|wmv|mkv|m4v|webm)$/i.test(file.name) || file.type.startsWith('video/');
+      const limitMB = isVideo ? 100 : 10;
+      if (file.size > limitMB * 1024 * 1024) {
+        alert(`"${file.name}" exceeds the ${limitMB}MB limit for ${isVideo ? 'videos' : 'images'}.`);
+        e.target.value = '';
+        return;
+      }
+    }
+
     setFileCount(selected.length);
     setUploading(true);
     setUploadedUrls([]);
+    setUploadError('');
 
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -35,12 +57,22 @@ export default function OrderForm() {
       data.append('file', file);
       data.append('upload_preset', uploadPreset!);
       const resourceType = /\.(mov|mp4|avi|wmv|mkv|m4v|webm)$/i.test(file.name) || file.type.startsWith('video/') ? 'video' : 'image';
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
-        { method: 'POST', body: data }
-      );
-      const json = await res.json();
-      if (json.secure_url) urls.push(json.secure_url);
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+          { method: 'POST', body: data }
+        );
+        const json = await res.json();
+        if (json.secure_url) {
+          urls.push(json.secure_url);
+        } else {
+          const reason = json.error?.message || JSON.stringify(json);
+          console.error('Cloudinary error:', reason);
+          setUploadError(`Upload failed: ${reason}`);
+        }
+      } catch {
+        setUploadError(`Failed to upload "${file.name}". Please check your connection and try again.`);
+      }
     }
 
     setUploadedUrls(urls);
@@ -58,10 +90,13 @@ export default function OrderForm() {
       data.append('email', formData.email);
       data.append('phone', formData.phone);
       data.append('recipientName', formData.recipientName);
+  data.append('occasion', formData.occasion);
+  data.append('theme', formData.theme);
       data.append('memory', formData.memory);
       data.append('compliment1', formData.compliment1);
       data.append('compliment2', formData.compliment2);
       data.append('compliment3', formData.compliment3);
+  data.append('additionalNotes', formData.additionalNotes);
       data.append('message', formData.message);
       uploadedUrls.forEach((url) => data.append('fileUrls', url));
 
@@ -134,6 +169,46 @@ export default function OrderForm() {
             onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
           />
         </div>
+        
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Occasion</label>
+            <select
+              value={formData.occasion}
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+              onChange={(e) => setFormData({ ...formData, occasion: e.target.value })}
+            >
+              <option value="">Select an occasion</option>
+              <option value="birthday">Birthday</option>
+              <option value="anniversary">Anniversary</option>
+              <option value="valentines-day">Valentine&apos;s Day</option>
+              <option value="mothers-day">Mother&apos;s Day</option>
+              <option value="fathers-day">Father&apos;s Day</option>
+              <option value="wedding">Wedding</option>
+              <option value="graduation">Graduation</option>
+              <option value="baby-shower">Baby Shower</option>
+              <option value="christmas">Christmas / Holiday</option>
+              <option value="easter">Easter</option>
+              <option value="retirement">Retirement</option>
+              <option value="get-well">Get Well Soon</option>
+              <option value="sympathy">Sympathy</option>
+              <option value="just-because">Just Because</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Theme (optional)</label>
+            <input
+              type="text"
+              placeholder="e.g. Star Wars, Beach, Floral"
+              value={formData.theme}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+              onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Section 2 — The Heart */}
@@ -146,20 +221,34 @@ export default function OrderForm() {
         </div>
 
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Upload Photos (Max 15)</label>
-          <label className="cursor-pointer block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:bg-rose-50 hover:border-rose-200 transition-colors">
+          <label className="block text-xs text-gray-500 mb-1">Upload Photos & Videos <span className="text-gray-300">(Max 15 files · Photos up to 10MB · Videos up to 100MB)</span></label>
+          <label className={`cursor-pointer block border-2 border-dashed rounded-xl p-8 text-center transition-colors ${uploadedUrls.length > 0 ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-gray-50 hover:bg-rose-50 hover:border-rose-200'}`}>
             <div className="flex flex-col items-center gap-2">
-              <svg className="w-9 h-9 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
+              {uploadedUrls.length > 0 ? (
+                <svg className="w-9 h-9 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-9 h-9 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+              )}
               {uploading ? (
                 <p className="text-rose-500 text-sm font-medium">Uploading {fileCount} file(s)...</p>
+              ) : uploadError ? (
+                <>
+                  <p className="text-red-500 text-sm font-semibold">{uploadError}</p>
+                  <p className="text-gray-400 text-xs">Click to try again</p>
+                </>
               ) : uploadedUrls.length > 0 ? (
-                <p className="text-green-600 text-sm font-semibold">{uploadedUrls.length} file(s) uploaded ✓</p>
+                <>
+                  <p className="text-green-600 text-base font-semibold">{uploadedUrls.length} file{uploadedUrls.length > 1 ? 's' : ''} uploaded successfully!</p>
+                  <p className="text-green-500 text-xs">Click here to replace your files</p>
+                </>
               ) : (
                 <>
                   <p className="text-rose-500 text-sm font-medium">Click to upload your favorite moments</p>
-                  <p className="text-gray-400 text-xs">JPG, PNG and more · If you have a video file we will follow up · Hold Cmd (Mac) or Ctrl (Windows) to select multiple files</p>
+                  <p className="text-gray-400 text-xs">Photos (JPG, PNG) & Videos (MP4, MOV) · Hold Cmd (Mac) or Ctrl (Windows) to select multiple</p>
                 </>
               )}
             </div>
@@ -180,6 +269,17 @@ export default function OrderForm() {
             rows={5}
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          />
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-xs text-gray-500 mb-1">Additional Notes <span className="text-gray-300">(optional)</span></label>
+          <textarea
+            placeholder="Any extra details or special instructions..."
+            rows={3}
+            value={formData.additionalNotes}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+            onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
           />
         </div>
       </div>
