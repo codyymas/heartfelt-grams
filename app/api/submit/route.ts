@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     await resend.emails.send({
       from: 'Heartfelt Grams <onboarding@resend.dev>',
-      to: 'contact@heartfeltcraftsco.com',
+      to: process.env.RECIPIENT_EMAIL!,
       replyTo: email,
       subject: `New Order from ${name}`,
       html: `
