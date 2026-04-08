@@ -265,17 +265,18 @@ export default function OrderForm() {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-bold text-gray-700 mb-1">Did all of your files fit in the box above? If not, we will reach out for any photos or videos that did not fit via text. <span className="font-normal text-gray-400">(optional)</span></label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">Did all of your files fit in the box above? <span className="font-normal text-gray-500">(Max 15 photos &amp; videos combined — if you submit more than 15, we will choose the 15 for you)</span> If not, we will reach out for any photos or videos that did not fit via text.</label>
           <textarea
             placeholder="e.g. Yes, please reach out for more — or — No, I included all my files!"
             rows={2}
+            required
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
             onChange={(e) => setFormData({ ...formData, missingFiles: e.target.value })}
           />
         </div>
 
         <div className="mt-4">
-          <label className="block text-xs text-gray-500 mb-1">Your Message <span className="text-gray-300">(optional)</span></label>
+          <label className="block text-xs text-gray-500 mb-1">Your Message <span className="text-gray-300">(optional — we can make a message for you, just let us know!)</span></label>
           <textarea
             placeholder="Write something heartfelt..."
             rows={5}
@@ -302,7 +303,7 @@ export default function OrderForm() {
           <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-600 text-sm font-bold flex items-center justify-center shrink-0">
             3
           </div>
-          <h2 className="font-semibold text-gray-800">A Favorite Memory <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
+          <h2 className="font-semibold text-gray-800">A Favorite Memory <span className="text-gray-400 font-normal text-sm">(optional — we can make one for you, just let us know!)</span></h2>
         </div>
 
         <textarea
@@ -319,7 +320,7 @@ export default function OrderForm() {
           <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-600 text-sm font-bold flex items-center justify-center shrink-0">
             4
           </div>
-          <h2 className="font-semibold text-gray-800">3 Compliments <span className="text-gray-400 font-normal text-sm">(optional)</span></h2>
+          <h2 className="font-semibold text-gray-800">3 Compliments <span className="text-gray-400 font-normal text-sm">(optional — we can make these for you, just let us know!)</span></h2>
         </div>
 
         <div className="space-y-3">
